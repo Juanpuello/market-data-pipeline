@@ -15,6 +15,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from prefect import flow, task
 
 from config.logging_config import get_logger
+from src.core.database import get_shared_engine
 from src.models import CleanData, RunModeEnum
 from src.pipeline.extract.extractor import DataExtractor
 from src.pipeline.load.loader import DataLoader
@@ -47,9 +48,11 @@ def run_pipeline(
     Returns:
         Dictionary with comprehensive pipeline metrics
     """
-    extractor = DataExtractor(db_connection_string)
-    transformer = DataTransformer(db_connection_string)
-    loader = DataLoader(db_connection_string)
+    engine = get_shared_engine(db_connection_string)
+
+    extractor = DataExtractor(engine=engine)
+    transformer = DataTransformer(engine=engine)
+    loader = DataLoader(engine=engine)
 
     pipeline_start = datetime.now(timezone.utc)
 
@@ -230,7 +233,13 @@ def validate_data_integrity(
     db_connection_string: str = "sqlite:///market_data.db",
 ) -> Dict[str, Any]:
     """Run data integrity validation across the pipeline."""
-    return DataLoader(db_connection_string).validate_clean_data_integrity()
+    engine = get_shared_engine(db_connection_string)
+    return DataLoader(engine=engine).validate_clean_data_integrity()
+    """Run data integrity validation across the pipeline."""
+    engine, session_local = get_shared_engine(db_connection_string)
+    return DataLoader(
+        engine=engine, session_local=session_local
+    ).validate_clean_data_integrity()
 
 
 if __name__ == "__main__":

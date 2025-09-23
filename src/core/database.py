@@ -11,9 +11,10 @@ and SQLAlchemy table creation with automatic migration support.
 """
 
 from datetime import date, datetime, timezone
+from typing import Dict
 
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.engine import Engine
 from sqlmodel import SQLModel
 
 from config.logging_config import get_logger
@@ -21,12 +22,15 @@ from config.logging_config import get_logger
 logger = get_logger(__name__)
 
 
+_engine_cache: Dict[str, Engine] = {}
+
+
 def utc_now():
     """Get current UTC timestamp with timezone awareness."""
     return datetime.now(timezone.utc)
 
 
-def create_database_engine(connection_string: str):
+def create_database_engine(connection_string: str) -> Engine:
     """
     Create database engine with appropriate connection pooling.
 
@@ -34,8 +38,11 @@ def create_database_engine(connection_string: str):
         connection_string: Database connection string
 
     Returns:
-        Tuple of (engine, SessionLocal class)
+        SQLAlchemy engine
     """
+    if connection_string in _engine_cache:
+        logger.debug(f"Reusing cached engine for: {connection_string}")
+        return _engine_cache[connection_string]
     if connection_string.startswith("sqlite"):
         engine = create_engine(connection_string, echo=False, pool_pre_ping=True)
     else:
@@ -47,9 +54,27 @@ def create_database_engine(connection_string: str):
             pool_pre_ping=True,
         )
 
-    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    _engine_cache[connection_string] = engine
+    logger.debug(f"Created and cached new engine for: {connection_string}")
 
-    return engine, SessionLocal
+    return engine
+
+
+def get_shared_engine(connection_string: str) -> Engine:
+    """
+    Get a shared database engine, creating it if it doesn't exist.
+
+    This function ensures that the same engine instance is reused across
+    all components of the application for a given connection string in a
+    singleton-like pattern.
+
+    Args:
+        connection_string: Database connection string
+
+    Returns:
+        SQLAlchemy engine
+    """
+    return create_database_engine(connection_string)
 
 
 def create_tables(engine):
@@ -84,7 +109,7 @@ if __name__ == "__main__":
         SwapTenorEnum,
     )
 
-    engine, SessionLocal = create_database_engine("sqlite:///./market_data.db")
+    engine = create_database_engine("sqlite:///./market_data.db")
     create_tables(engine)
 
     with Session(engine) as session:

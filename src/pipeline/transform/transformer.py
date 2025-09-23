@@ -16,6 +16,7 @@ from typing import Dict, List, Optional, Tuple
 
 from pydantic import ValidationError
 from sqlalchemy import and_
+from sqlalchemy.engine import Engine
 from sqlmodel import Session, col, select
 
 # Add parent directory to path for imports when running directly
@@ -29,9 +30,24 @@ from src.models import CleanData, OptionExpiryEnum, RawData, SwapTenorEnum
 class DataTransformer:
     """Handles transformation of raw data into clean, validated format."""
 
-    def __init__(self, db_connection_string: str = "sqlite:///market_data.db"):
-        """Initialize transformer with database connection."""
-        self.engine, self.SessionLocal = create_database_engine(db_connection_string)
+    def __init__(
+        self,
+        db_connection_string: Optional[str] = None,
+        engine: Optional[Engine] = None,
+    ):
+        """
+        Initialize transformer with database connection.
+
+        Args:
+            db_connection_string: Database connection string (legacy, will create new engine)
+            engine: Shared SQLAlchemy engine instance
+        """
+        if engine is not None:
+            self.engine = engine
+        elif db_connection_string is not None:
+            self.engine = create_database_engine(db_connection_string)
+        else:
+            raise ValueError("Either provide engine or db_connection_string")
 
         # Currency to reference rate mapping based on requirements
         self.currency_ref_mapping = {

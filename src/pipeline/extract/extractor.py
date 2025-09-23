@@ -11,10 +11,11 @@ This module handles:
 import json
 from datetime import date, datetime, timezone
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import pandas as pd
 from sqlalchemy import func
+from sqlalchemy.engine import Engine
 from sqlmodel import Session, select
 
 from config.logging_config import get_logger
@@ -28,9 +29,25 @@ logger = get_logger(__name__)
 class DataExtractor:
     """Handles data extraction from API and storage to raw_data table."""
 
-    def __init__(self, db_connection_string: str = "sqlite:///market_data.db"):
-        """Initialize extractor with database connection."""
-        self.engine, self.SessionLocal = create_database_engine(db_connection_string)
+    def __init__(
+        self,
+        db_connection_string: Optional[str] = None,
+        engine: Optional[Engine] = None,
+    ):
+        """
+        Initialize extractor with database connection.
+
+        Args:
+            db_connection_string: Database connection string (legacy, will create new engine)
+            engine: Shared SQLAlchemy engine instance
+        """
+        if engine is not None:
+            self.engine = engine
+        elif db_connection_string is not None:
+            self.engine = create_database_engine(db_connection_string)
+        else:
+            raise ValueError("Either provide engine or db_connection_string")
+
         self.api_client = MarketData()
         self.blob_storage_path = Path("blob_storage")
         self.blob_storage_path.mkdir(exist_ok=True)

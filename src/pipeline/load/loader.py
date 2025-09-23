@@ -10,9 +10,10 @@ This module handles:
 
 import sys
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from sqlalchemy import and_
+from sqlalchemy.engine import Engine
 from sqlmodel import Session, col, select
 
 # Add parent directory to path for imports when running directly
@@ -26,9 +27,24 @@ from src.models import CleanData, RawData
 class DataLoader:
     """Handles loading of clean data with upsert capabilities."""
 
-    def __init__(self, db_connection_string: str = "sqlite:///market_data.db"):
-        """Initialize loader with database connection."""
-        self.engine, self.session_local = create_database_engine(db_connection_string)
+    def __init__(
+        self,
+        db_connection_string: Optional[str] = None,
+        engine: Optional[Engine] = None,
+    ):
+        """
+        Initialize loader with database connection.
+
+        Args:
+            db_connection_string: Database connection string (legacy, will create new engine)
+            engine: Shared SQLAlchemy engine instance
+        """
+        if engine is not None:
+            self.engine = engine
+        elif db_connection_string is not None:
+            self.engine = create_database_engine(db_connection_string)
+        else:
+            raise ValueError("Either provide engine or db_connection_string")
 
     def load_clean_data(self, clean_records: List[CleanData]) -> Dict[str, int]:
         """
