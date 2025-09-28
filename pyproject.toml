@@ -10,6 +10,7 @@ dependencies = [
     "azure-identity>=1.14.0",
     "azure-keyvault-secrets>=4.7.0",
     "azure-storage-blob>=12.0.0",
+    "great-expectations>=1.6.3",
     "pandas>=2.0.0",
     "prefect>=3.0.0",
     "psycopg2-binary>=2.9.0",

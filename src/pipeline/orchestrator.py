@@ -235,11 +235,6 @@ def validate_data_integrity(
     """Run data integrity validation across the pipeline."""
     engine = get_shared_engine(db_connection_string)
     return DataLoader(engine=engine).validate_clean_data_integrity()
-    """Run data integrity validation across the pipeline."""
-    engine, session_local = get_shared_engine(db_connection_string)
-    return DataLoader(
-        engine=engine, session_local=session_local
-    ).validate_clean_data_integrity()
 
 
 if __name__ == "__main__":

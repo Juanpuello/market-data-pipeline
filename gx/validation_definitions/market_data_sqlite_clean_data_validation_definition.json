@@ -1,0 +1,22 @@
+{
+  "data": {
+    "asset": {
+      "id": "39dc9790-688f-4c24-8ec8-8c3694c7aa45",
+      "name": "clean_data_asset"
+    },
+    "batch_definition": {
+      "id": "bf624384-75e4-4f7c-8b33-1e117c5a6f99",
+      "name": "clean_data_full_batch"
+    },
+    "datasource": {
+      "id": "422c8dd2-3586-4995-a729-e70fbec8ce3d",
+      "name": "market_data_sqlite"
+    }
+  },
+  "id": "fa7e553f-8bee-4cdf-97cc-7f65b00984da",
+  "name": "market_data_sqlite_clean_data_validation_definition",
+  "suite": {
+    "id": "4f1f0196-44a6-4873-be1b-0d2a0f4347f0",
+    "name": "market_data_sqlite_clean_data_expectation_suite"
+  }
+}

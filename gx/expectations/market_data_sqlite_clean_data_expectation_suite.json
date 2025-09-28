@@ -1,0 +1,32 @@
+{
+  "expectations": [
+    {
+      "id": "dca7ca0b-4b59-42e5-8c17-27aba749f7a5",
+      "kwargs": {
+        "column": "clean_data_id",
+        "max_value": 6.0,
+        "min_value": 1.0
+      },
+      "meta": {},
+      "severity": "warning",
+      "type": "expect_column_max_to_be_between"
+    },
+    {
+      "id": "2f34f91d-16db-44b3-b6a2-e22248f0db78",
+      "kwargs": {
+        "column": "raw_data_id",
+        "max_value": 6.0,
+        "min_value": 1.0
+      },
+      "meta": {},
+      "severity": "warning",
+      "type": "expect_column_max_to_be_between"
+    }
+  ],
+  "id": "4f1f0196-44a6-4873-be1b-0d2a0f4347f0",
+  "meta": {
+    "great_expectations_version": "1.6.3"
+  },
+  "name": "market_data_sqlite_clean_data_expectation_suite",
+  "notes": null
+}
